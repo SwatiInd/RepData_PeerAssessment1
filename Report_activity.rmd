@@ -1,0 +1,40 @@
+---
+title: 'Course Project: Activity Monitoring Devices Data Analysis'
+author: "SG"
+date: "23/06/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "asis", message = FALSE, warning=FALSE)
+```
+## Data reading and processing
+1. Code for reading in the dataset and/or processing the data
+Packages "lubridate"  and "dplyr" are useful in analysing data related to dates and data frames, respectively.
+
+```{r}
+library(dplyr)
+library(lubridate)
+setwd("~/Online_Courses/Data Analysis R Foundations/Reproducible research/Project 1/RepData_PeerAssessment1")
+data <- read.table(unz("activity.zip", "activity.csv"), sep=",", header = TRUE)
+data$date <- as.Date(data$date)
+```
+
+Next, we perform data analysis as per the assignment's instructions. 
+
+## Steps per day
+2. Histogram of the total number of steps taken each day
+
+```{r fig.align = 'center'}
+step_day <- data %>% group_by(date) %>% summarize(stepsperday = sum(steps, na.rm = TRUE))
+with(step_day, hist(stepsperday, breaks = 50, xlab = "Steps per day", ylab = "Frequency - Number of days", main = "Histogram of steps per day"))
+```
+
+3. Mean and median of steps taken each day
+```{r}
+mean <- mean(step_day$stepsperday)
+median <- median(step_day$stepsperday)
+```
+The mean value is `r round(mean, 2)` and median value is `r median`.
+
+
