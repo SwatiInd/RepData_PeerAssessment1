@@ -10,12 +10,37 @@ data$date <- as.Date(data$date)
 
 ## Analysis of total steps per day
 step_day <- data %>% group_by(date) %>% summarize(stepsperday = sum(steps, na.rm = TRUE))
-with(step_day, hist(stepsperday, breaks = 25, xlab = "Steps per day", ylab = "Number of days", main = "Histogram of steps per day"))
+with(step_day, hist(stepsperday, breaks = 25, xlim = c(0, 25000), ylim = c(0,12),
+                    xlab = "Steps per day", ylab = "Number of days", 
+                    main = "Histogram of steps per day"))
 
-mean(step_day$stepsperday)
-median(step_day$stepsperday)
+mean <- mean(step_day$stepsperday)
+median <- median(step_day$stepsperday)
 
 ## Analysis of daily activity pattern
 step_pattern <- data %>% group_by(interval) %>% summarize(stepsperinterval = mean(steps, na.rm = TRUE))
 
-datetime <- as.POSIXct(paste(data$date,strptime(data$interval, "%H%M")))
+step_pattern$time <- sprintf('%04d', step_pattern$interval) %>% strptime("%H%M")
+with(step_pattern, plot(time, stepsperinterval, type = 'l', xlab = "Time", 
+                        ylab = "Average no. of steps", main = "Average steps per Interval"))
+
+max_index <- which.max(step_pattern$stepsperinterval)
+max_interval <- step_pattern$time[max_index] %>% strftime(max_interval, format="%H:%M")
+
+## NA missing values
+na_sum <- sum(is.na(data))
+
+data2 <- data
+na_index <- which(is.na(data2))
+data2$stnew <- data2$steps 
+na_interval <- data2$interval[na_index]
+data2$stnew[na_index] <- step_pattern$stepsperinterval[sapply(na_interval, 
+                        function(x){which(step_pattern$interval == x)})]
+
+step_day_new <- data2 %>% group_by(date) %>% summarize(stepsperday = sum(stnew))
+with(step_day_new, hist(stepsperday, breaks = 25, xlim = c(0, 25000), ylim = c(0,14),
+                    xlab = "Steps per day", ylab = "Number of days", 
+                    main = "Histogram of steps per day"))
+
+mean_new <- mean(step_day_new$stepsperday)
+median_new <- median(step_day_new$stepsperday)
