@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE, results = "asis", message = FALSE, warning=FA
 ```
 
 ## Loading and preprocessing the data
-1. Code for reading in the dataset and/or processing the data
+- Code for reading in the dataset and/or processing the data
 Packages "lubridate"  and "dplyr" are useful in analysing data related to dates and data frames, respectively.
 
 ```{r}
@@ -26,7 +26,7 @@ Next, we perform data analysis as per the assignment's instructions.
 
 
 ## What is mean total number of steps taken per day?
-2. Histogram of the total number of steps taken each day
+### 1. Histogram of the total number of steps taken each day
 
 ```{r fig.align = 'center'}
 step_day <- data %>% group_by(date) %>% summarize(stepsperday = sum(steps, na.rm = TRUE))
@@ -36,7 +36,7 @@ with(step_day, hist(stepsperday, breaks = 50,
                     main = "Histogram of steps per day"))
 ```
 
-3. Mean and median of steps taken each day
+### 2. Mean and median of steps taken each day
 ```{r}
 mean <- mean(step_day$stepsperday)
 median <- median(step_day$stepsperday)
@@ -44,14 +44,14 @@ median <- median(step_day$stepsperday)
 The mean and median of total steps taken per day are **`r round(mean, 2)`** and **`r median`**, respectively.
 
 
-
 ## What is the average daily activity pattern?
 
-(a) Time-series plot of 5-minute interval and average number of steps in each interval \
+### 1. Time-series plot of 5-minute interval and average number of steps in each interval \
 
-First, the data is grouped according to intervals and subsequently, average of steps of each interval were calculated. Thus obtained, "step_pattern" has data of interval and average steps. In the next step, intervals were converted into time series by using function strptime. In the last step, the average steps of intervals were plotted as a function of the interval. 
+- First, the data is grouped according to intervals and subsequently, average of steps of each interval were calculated. Thus obtained, "step_pattern" has data of interval and average steps.
+- In the next step, intervals were converted into time series by using function strptime. In the last step, the average steps of intervals were plotted as a function of the interval. 
 
-```{r}
+```{r fig.align = 'center'}
 step_pattern <- data %>% group_by(interval) %>% summarize(stepsperinterval = mean(steps, na.rm = TRUE))
 
 step_pattern$time <- sprintf('%04d', step_pattern$interval) %>% strptime("%H%M")
@@ -60,8 +60,9 @@ with(step_pattern, plot(time, stepsperinterval, type = 'l',
                         main = "Average steps per Interval"))
 ```
 
-(b) Determination the interval of the maximum no. of average steps per interval calculated in part(a) \
-First, the index of maximum stpes were calculated and the interval was extracted from the time series generated in part(a).
+### 2. Determination the interval of the maximum no. of average steps per interval calculated in part(a) 
+- First, the index of maximum stpes were calculated.
+ - The interval was extracted from the time series generated in part(a).
 
 ```{r}
 max_index <- which.max(step_pattern$stepsperinterval)
@@ -71,7 +72,41 @@ max_interval <- step_pattern$time[max_index] %>% strftime(max_interval, format="
 On average across all the days in the dataset, **`r max_interval`** has the maximum no. of steps.
 
 ## Imputing missing values
+### 1. Total number of missing values
+```{r}
+na_sum <- sum(is.na(data))
+```
+The total number of missing rows are **`r na_sum`**.
 
+### 2. Create a new data set with missing values
+We filled the missing values by the mean for that 5-minute interval in the following steps:
+- A new dataset "data2" was created with the same values as of "data".
+- The indecies of "NA" rows were extracted as the steps of these rows are replaced.
+- Values were replaced by matching the intervals of missing value to the the previously created dataset "step_pattern" of mean for 5-minute interval.
 
+```{r}
+data2 <- data
+na_index <- which(is.na(data2))
+data2$stnew <- data2$steps 
+na_interval <- data2$interval[na_index]
+data2$stnew[na_index] <- step_pattern$stepsperinterval[sapply(na_interval, 
+                        function(x){which(step_pattern$interval == x)})]
+
+```
+
+### 3. Histogram of total number of steps taken each day
+```{r fig.align = 'center'}
+step_day_new <- data2 %>% group_by(date) %>% summarize(stepsperday = sum(stnew))
+with(step_day_new, hist(stepsperday, breaks = 25, xlim = c(0, 25000), ylim = c(0,20),
+                    xlab = "Steps per day", ylab = "Number of days", 
+                    main = "Histogram of steps per day"))
+```
+
+### Comparison of mean and median of steps per day with and without imputing values
+```{r}
+mean_new <- mean(step_day_new$stepsperday, scipen = 999)
+median_new <- median(step_day_new$stepsperday)
+```
+The mean of steps per day with and without NA imputing are `r format(mean_new, scientific = FALSE)` and `r round(mean,2)`, respectively. Similarly, the median with and without NA implementing are `r format(median_new, scientific = FALSE)` and `r format(median, scientific = FALSE)`, respectively.
 
 ## Are there differences in activity patterns between weekdays and weekends?
