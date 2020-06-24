@@ -30,7 +30,10 @@ Next, we perform data analysis as per the assignment's instructions.
 
 ```{r fig.align = 'center'}
 step_day <- data %>% group_by(date) %>% summarize(stepsperday = sum(steps, na.rm = TRUE))
-with(step_day, hist(stepsperday, breaks = 50, xlab = "Steps per day", ylab = "Frequency - Number of days", main = "Histogram of steps per day"))
+with(step_day, hist(stepsperday, breaks = 50, 
+                     xlim = c(0, 25000), ylim = c(0, 12),
+                    xlab = "Steps per day", ylab = "Frequency - Number of days", 
+                    main = "Histogram of steps per day"))
 ```
 
 3. Mean and median of steps taken each day
@@ -44,7 +47,28 @@ The mean and median of total steps taken per day are **`r round(mean, 2)`** and 
 
 ## What is the average daily activity pattern?
 
+(a) Time-series plot of 5-minute interval and average number of steps in each interval \
 
+First, the data is grouped according to intervals and subsequently, average of steps of each interval were calculated. Thus obtained, "step_pattern" has data of interval and average steps. In the next step, intervals were converted into time series by using function strptime. In the last step, the average steps of intervals were plotted as a function of the interval. 
+
+```{r}
+step_pattern <- data %>% group_by(interval) %>% summarize(stepsperinterval = mean(steps, na.rm = TRUE))
+
+step_pattern$time <- sprintf('%04d', step_pattern$interval) %>% strptime("%H%M")
+with(step_pattern, plot(time, stepsperinterval, type = 'l', 
+                        xlab = "Time", ylab = "Average no. of steps", 
+                        main = "Average steps per Interval"))
+```
+
+(b) Determination the interval of the maximum no. of average steps per interval calculated in part(a) \
+First, the index of maximum stpes were calculated and the interval was extracted from the time series generated in part(a).
+
+```{r}
+max_index <- which.max(step_pattern$stepsperinterval)
+max_interval <- step_pattern$time[max_index] %>% strftime(max_interval, format="%H:%M")
+```
+
+On average across all the days in the dataset, **`r max_interval`** has the maximum no. of steps.
 
 ## Imputing missing values
 
