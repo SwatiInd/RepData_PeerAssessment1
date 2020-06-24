@@ -122,7 +122,7 @@ data2$type <- factor(sapply(data2$date, function(x) {if(weekdays(x) %in% weekday
 
 Then average number of steps per interval for weekday and weekend were calculated and plotted separately. 
 ```{r fig.align = 'center'}
-step_pattern_imputed <- data2 %>% group_by(interval, type) %>% 
+step_pattern_imputed <- data2   %>% group_by(interval, type) %>% 
     summarize(stepsperinterval = mean(stnew))
 q <- with(step_pattern_imputed, qplot(interval, stepsperinterval, facets = type~., 
                                       xlab = "Interval",ylab = "Average no. of steps", 
