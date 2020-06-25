@@ -475,7 +475,7 @@ median_new &lt;- median(step_day_new$stepsperday)</code></pre>
 weekend &lt;- c(&quot;Saturday&quot;, &quot;Sunday&quot;)
 data2$type &lt;- factor(sapply(data2$date, function(x) {if(weekdays(x) %in% weekday) &quot;Weekday&quot; else &quot;Weekend&quot;}))</code></pre>
 <p>Then average number of steps per interval for weekday and weekend were calculated and plotted separately.</p>
-<pre class="r"><code>step_pattern_imputed &lt;- data2 %&gt;% group_by(interval, type) %&gt;% 
+<pre class="r"><code>step_pattern_imputed &lt;- data2   %&gt;% group_by(interval, type) %&gt;% 
     summarize(stepsperinterval = mean(stnew))
 q &lt;- with(step_pattern_imputed, qplot(interval, stepsperinterval, facets = type~., 
                                       xlab = &quot;Interval&quot;,ylab = &quot;Average no. of steps&quot;, 
